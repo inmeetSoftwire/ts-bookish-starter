@@ -3,14 +3,19 @@ import 'dotenv/config';
 
 import healthcheckRoutes from './controllers/healthcheckController';
 import bookRoutes from './controllers/bookController';
+import borrowedRoutes from './controllers/borrowedController'
 
-import { book } from './interfaces'
+import { Book } from './bookInterface'
 import { getBooksFromDB, getUsersFromDB } from './seqModels';
 
 const port = process.env['PORT'] || 3000;
 
 const app = express();
-app.use(express.urlencoded({ extended: true }));
+
+var bodyParser = require('body-parser')
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json())
+
 app.listen(port, () => {
     return console.log(`Express is listening at http://localhost:${port}`);
 });
@@ -20,6 +25,7 @@ app.listen(port, () => {
  */
 app.use('/healthcheck', healthcheckRoutes);
 app.use('/books', bookRoutes);
+app.use('/borrowedby', borrowedRoutes)
 
 // app.get('/bookList', (req, res) => {
 //   executeStatement()
@@ -79,7 +85,7 @@ function executeStatement() {
   
   
   request.on('row', function(columns) {
-    const thisBook = {} as book; 
+    const thisBook = {} as Book; 
     columns.forEach(function(column) {
       
       if (column.value === null) {

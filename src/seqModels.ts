@@ -47,6 +47,23 @@ export async function getBooksFromDB(): Promise<JSON> {
     return books
 }
 
+export async function getBookFromDBWhereIsbnIs(isbn : number): Promise<JSON> {
+  if (String(isbn).length != 13) {
+    console.log(`${isbn} is not a valid ISBN`)
+  } else {
+    const book = await Book.findByPk(isbn)
+    if (book == null) {
+      console.log("Book not found in Library!")
+    } else {
+      return book;
+    }
+  }
+}
+
+export async function postNewBook(bookJson : JSON) {
+	const book = await Book.create(bookJson)
+}
+
 const User = sequelize.define(
   'users',
   {
@@ -76,3 +93,38 @@ export async function getUsersFromDB(): Promise<JSON> {
 }
 
 
+const BorrowedBooks = sequelize.define(
+	'borrowedBooks',
+	{
+	  userId: {
+		type: DataTypes.STRING,
+		allowNull: false
+	  },
+	  isbn: {
+		type: DataTypes.STRING,
+		allowNull: false
+	 
+	  },
+	  checkoutId: {
+		type: DataTypes.UUID,
+		allowNull: false,
+		primaryKey: true
+	  }
+	},
+	{
+	  timestamps: false
+	}
+);
+
+export async function getBorrowedBooksWhereUserIdIs(uid : string) {
+	const books = await BorrowedBooks.findAll({
+		where: {
+			userId: uid
+		}
+	})
+	const bookArray: JSON[] = [];
+	books.forEach(book => {
+		getBookFromDBWhereIsbnIs(book.isbn)
+	});
+	return books
+}
